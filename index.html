@@ -1,0 +1,205 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lovely Lock — Enter PIN</title>
+  <style>
+    :root{
+      --bg1:#0f172a; /* dark navy */
+      --bg2:#1f2937; /* slate */
+      --glass: rgba(255,255,255,0.06);
+      --accent:#ff758c; /* pink */
+      --accent2:#7ee7c6; /* mint */
+      --text:#eef2ff;
+      --glass-2: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,'Helvetica Neue',Arial}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 600px at 10% 10%, #0b1220 0%, transparent 20%),
+                  radial-gradient(900px 500px at 95% 95%, #1a0f1f 0%, transparent 20%),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      display:flex;align-items:center;justify-content:center;padding:24px;
+    }
+    .phone{
+      width:360px; max-width:96vw; border-radius:28px; padding:18px; position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .top-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .notch{height:6px;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent2));flex:1;opacity:0.95}
+    h1{font-size:18px;margin:0;font-weight:600;letter-spacing:0.2px}
+    p.sub{margin:0;color:rgba(238,242,255,0.7);font-size:13px}.screen{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+        border-radius:16px;padding:22px;display:flex;flex-direction:column;align-items:center;}
+
+.lock-area{width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px}
+.code-dots{display:flex;gap:12px}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--glass-2);box-shadow:inset 0 -2px 4px rgba(0,0,0,0.4);transition:all .18s ease}
+.dot.filled{background:linear-gradient(90deg,var(--accent),var(--accent2));transform:scale(1.05);box-shadow:0 6px 18px rgba(126,231,198,0.12)}
+
+.title{font-size:20px;font-weight:700}
+
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;width:100%;max-width:300px}
+.key{background:rgba(255,255,255,0.03);border-radius:12px;padding:16px 0;text-align:center;font-size:18px;font-weight:700;user-select:none;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease}
+.key:active{transform:scale(.98)}
+.key.small{padding:10px 0;font-size:15px}
+
+.action-row{display:flex;gap:10px;margin-top:12px;width:100%;justify-content:center}
+.btn{padding:10px 16px;border-radius:12px;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+
+.unlocked{display:none;flex-direction:column;align-items:center;gap:12px;padding:20px}
+.unlocked.show{display:flex}
+.heart{
+  font-size:52px;line-height:1;color:var(--accent);text-shadow:0 8px 30px rgba(255,117,140,0.12), 0 2px 6px rgba(0,0,0,0.5);
+  transform:translateY(-6px)
+}
+.love-msg{font-size:22px;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* shake for wrong */
+@keyframes shake{0%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}100%{transform:translateX(0)}}
+.shake{animation:shake .5s}
+
+/* footer */
+.hint{font-size:12px;color:rgba(238,242,255,0.6);margin-top:8px}
+
+/* responsive smaller */
+@media (max-width:380px){ .phone{padding:14px;border-radius:22px} }
+
+  </style>
+</head>
+<body>
+  <div class="phone" role="main">
+    <div class="top-bar">
+      <div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(15,23,42,0.6)">💖</div>
+      <div style="flex:1">
+        <h1>Lovely Lock</h1>
+        <p class="sub">Enter the PIN to unlock the surprise</p>
+      </div>
+    </div><div class="screen">
+  <div class="lock-area" id="lockArea">
+    <div class="title">Enter PIN</div>
+    <div class="code-dots" id="dots">
+      <div class="dot" data-index="0"></div>
+      <div class="dot" data-index="1"></div>
+      <div class="dot" data-index="2"></div>
+      <div class="dot" data-index="3"></div>
+    </div>
+
+    <div class="keypad" id="keypad">
+      <div class="key">1</div>
+      <div class="key">2</div>
+      <div class="key">3</div>
+      <div class="key">4</div>
+      <div class="key">5</div>
+      <div class="key">6</div>
+      <div class="key">7</div>
+      <div class="key">8</div>
+      <div class="key">9</div>
+      <div class="key small btn" id="clear">Clear</div>
+      <div class="key">0</div>
+      <div class="key small btn" id="del">Del</div>
+    </div>
+
+    <div class="action-row">
+      <div class="btn" id="showHint">Need help?</div>
+    </div>
+    <div class="hint">(This is a demo — change PIN in script.)</div>
+  </div>
+
+  <div class="unlocked" id="unlocked">
+    <div class="heart">❤</div>
+    <div class="love-msg">BHEN KE LODE</div>
+    <div style="font-size:13px;color:rgba(238,242,255,0.72);">You're beautiful — unlocked ✨</div>
+  </div>
+
+</div>
+
+  </div><script>
+  (function(){
+    // Change this to set a different PIN. Keep it as string. Default PIN: "22"
+    const CORRECT_PIN = '22';
+    // You can change the visible dot count (here 4). If you change, also adjust HTML.
+    const REQUIRED_LENGTH = 4;
+
+    const dots = document.getElementById('dots');
+    const keypad = document.getElementById('keypad');
+    const clearBtn = document.getElementById('clear');
+    const delBtn = document.getElementById('del');
+    const showHint = document.getElementById('showHint');
+    const lockArea = document.getElementById('lockArea');
+    const unlocked = document.getElementById('unlocked');
+
+    let entry = '';
+
+    function renderDots(){
+      const dotsEls = dots.querySelectorAll('.dot');
+      dotsEls.forEach((d,i)=>{
+        if(i < entry.length) d.classList.add('filled'); else d.classList.remove('filled');
+      });
+    }
+
+    function wrongFeedback(){
+      lockArea.classList.add('shake');
+      setTimeout(()=>lockArea.classList.remove('shake'),520);
+      entry=''; renderDots();
+    }
+
+    function unlock(){
+      // show unlocked view
+      document.getElementById('lockArea').style.display='none';
+      unlocked.classList.add('show');
+      // small animation
+      unlocked.animate([{opacity:0, transform:'translateY(8px)'},{opacity:1, transform:'translateY(0)'}],{duration:420,easing:'cubic-bezier(.2,.9,.3,1)'});
+    }
+
+    keypad.addEventListener('click', e=>{
+      const t = e.target;
+      if(!t.classList.contains('key')) return;
+      if(t.id==='clear' || t.id==='del') return;
+      const val = t.textContent.trim();
+      if(entry.length >= REQUIRED_LENGTH) return; // limit
+      entry += val;
+      renderDots();
+      if(entry.length === REQUIRED_LENGTH){
+        // check pin — in this demo we compare last digits to CORRECT_PIN
+        // Accept if last N digits equal CORRECT_PIN (so "0022" also unlocks if CORRECT_PIN is "22")
+        const last = entry.slice(-CORRECT_PIN.length);
+        if(last === CORRECT_PIN){
+          unlock();
+        } else {
+          setTimeout(wrongFeedback, 220);
+        }
+      }
+    });
+
+    delBtn.addEventListener('click', ()=>{
+      entry = entry.slice(0,-1);
+      renderDots();
+    });
+    clearBtn.addEventListener('click', ()=>{ entry=''; renderDots(); });
+
+    showHint.addEventListener('click', ()=>{
+      alert('Hint: PIN is two repeated digits.');
+    });
+
+    // make keypad accessible via keyboard (for desktop testing)
+    window.addEventListener('keydown', (e)=>{
+      if(unlocked.classList.contains('show')) return;
+      if(e.key >= '0' && e.key <= '9'){
+        if(entry.length < REQUIRED_LENGTH){ entry += e.key; renderDots(); }
+        if(entry.length === REQUIRED_LENGTH){ const last = entry.slice(-CORRECT_PIN.length); if(last === CORRECT_PIN) unlock(); else setTimeout(wrongFeedback,220); }
+      } else if(e.key === 'Backspace') { entry = entry.slice(0,-1); renderDots(); }
+    });
+
+    // initial render
+    renderDots();
+
+  })();
+</script></body>
+</html>
